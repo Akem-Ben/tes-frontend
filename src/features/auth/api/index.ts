@@ -6,14 +6,19 @@ const KEY = "tesms.auth.v1";
 
 export const emptyAuth: AuthState = { user: null, role: null };
 
+/** "admin" and "superadmin" both live in the admins table - see Admin.isSuperAdmin in mockStore.ts. */
 const roleCollection = (role: Role, db: Database) =>
-  role === "admin"
+  role === "admin" || role === "superadmin"
     ? db.admins
     : role === "president"
       ? db.presidents
       : db.facilitators;
 
-/** Same "endpoint" for every role; the role decides which collection is checked. */
+/**
+ * Same "endpoint" for every role; the role decides which collection is checked. A super admin logs in
+ * through this exact same `role: "admin"` call, same login page - the effective role returned is
+ * upgraded to "superadmin" here if that admin row has `isSuperAdmin: true`, never sent by the caller.
+ */
 export const login = (
   role: Role,
   email: string,
@@ -27,6 +32,10 @@ export const login = (
       a.password === password,
   );
   if (!found) throw new Error("Incorrect email or password for this role.");
+  const effectiveRole: Role =
+    role === "admin" && "isSuperAdmin" in found && found.isSuperAdmin
+      ? "superadmin"
+      : role;
   return {
     user: {
       id: found.id,
@@ -34,7 +43,7 @@ export const login = (
       email: found.email,
       photo: found.photo,
     },
-    role,
+    role: effectiveRole,
   };
 };
 

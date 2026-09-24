@@ -31,6 +31,8 @@ export type {
   Feedback,
   ChatRoom,
   ChatMessage,
+  ChatMemberRole,
+  ChatReaction,
   WaitingList,
   Quote,
 } from "./mockStore";

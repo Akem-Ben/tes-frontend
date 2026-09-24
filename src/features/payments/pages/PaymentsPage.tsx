@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Card, Select, Table, type Column, Input, Button } from "@/shared/ui";
-import { PageHeader } from "@/shared/components";
+import { PageHeader, BackLink } from "@/shared/components";
 import { useDb, currentWeekKey } from "@/shared/lib";
+import { useGroupParam } from "@/features/groups";
 import {
   ensureCurrentPeriodPayments,
   paymentSummary,
@@ -61,14 +62,19 @@ const AmountInput = styled(Input)`
 export function PaymentsPage() {
   const db = useDb();
   const period = currentWeekKey();
+  const { group: paramGroup } = useGroupParam();
+  const isGroupScoped = Boolean(paramGroup);
   const [groupId, setGroupId] = useState("all");
 
   useEffect(() => {
     ensureCurrentPeriodPayments();
   }, []);
 
+  const scopeGroupId = isGroupScoped ? paramGroup!.id : groupId;
   const payments = db.payments.filter(
-    (p) => p.period === period && (groupId === "all" || p.groupId === groupId),
+    (p) =>
+      p.period === period &&
+      (scopeGroupId === "all" || p.groupId === scopeGroupId),
   );
   const summary = paymentSummary(payments);
 
@@ -77,10 +83,15 @@ export function PaymentsPage() {
       header: "Student",
       cell: (p) => db.students.find((s) => s.id === p.studentId)?.name ?? "—",
     },
-    {
-      header: "Group",
-      cell: (p) => db.groups.find((g) => g.id === p.groupId)?.name ?? "—",
-    },
+    ...(isGroupScoped
+      ? []
+      : [
+          {
+            header: "Group",
+            cell: (p: Payment) =>
+              db.groups.find((g) => g.id === p.groupId)?.name ?? "—",
+          },
+        ]),
     { header: "Due", cell: (p) => `₦${p.amountDue.toLocaleString()}` },
     {
       header: "Paid",
@@ -108,7 +119,20 @@ export function PaymentsPage() {
 
   return (
     <>
-      <PageHeader title="Payments" subtitle={`This period: ${period}`} />
+      {isGroupScoped && (
+        <BackLink
+          to={`/groups/${paramGroup!.id}`}
+          label={`Back to ${paramGroup!.name}`}
+        />
+      )}
+      <PageHeader
+        title="Payments"
+        subtitle={
+          isGroupScoped
+            ? `${paramGroup!.name} · This period: ${period}`
+            : `This period: ${period}`
+        }
+      />
 
       <StatsGrid>
         <Card>
@@ -133,16 +157,18 @@ export function PaymentsPage() {
       </StatsGrid>
 
       <Card>
-        <FilterRow>
-          <Select
-            value={groupId}
-            onChange={(e) => setGroupId(e.target.value)}
-            options={[
-              { value: "all", label: "All groups" },
-              ...db.groups.map((g) => ({ value: g.id, label: g.name })),
-            ]}
-          />
-        </FilterRow>
+        {!isGroupScoped && (
+          <FilterRow>
+            <Select
+              value={groupId}
+              onChange={(e) => setGroupId(e.target.value)}
+              options={[
+                { value: "all", label: "All groups" },
+                ...db.groups.map((g) => ({ value: g.id, label: g.name })),
+              ]}
+            />
+          </FilterRow>
+        )}
         <Table columns={columns} rows={payments} rowKey={(p) => p.id} />
       </Card>
     </>

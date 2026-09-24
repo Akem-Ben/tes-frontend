@@ -6,8 +6,14 @@
  */
 import { useSyncExternalStore } from "react";
 
-export type Role = "admin" | "president" | "facilitator";
+export type Role = "admin" | "president" | "facilitator" | "superadmin";
 
+/**
+ * A super admin is an Admin row with `isSuperAdmin: true` - not a separate account table. They log in
+ * through the exact same admin login form; `login()` in `features/auth/api` computes the effective
+ * role from this flag. A super admin sees everything a president sees, everything an admin sees, and
+ * everything every individual facilitator sees.
+ */
 export interface Admin {
   id: string;
   name: string;
@@ -15,6 +21,7 @@ export interface Admin {
   password: string;
   phone: string;
   photo?: string | undefined;
+  isSuperAdmin?: boolean | undefined;
 }
 
 export interface President {
@@ -224,22 +231,40 @@ export interface Feedback {
   createdAt: string; // ISO datetime the record was entered
 }
 
+/** Who a chat member/sender id refers to. Students have no login - they're tagged, never senders. */
+export type ChatMemberRole = "facilitator" | "admin";
+
 export interface ChatRoom {
   id: string;
   name: string;
   facilitatorIds: string[];
+  /** Admins (including super admins) can be full members too - added by a facilitator or another admin. */
+  adminIds: string[];
+  /** Students tagged into the room for context - not senders, just referenced/visible members. */
+  studentIds: string[];
   createdBy: string;
+  createdByRole: ChatMemberRole;
   createdAt: string; // ISO datetime
 }
 
 export interface ChatMessage {
   id: string;
   roomId: string;
-  senderId: string; // facilitatorId
+  senderId: string;
+  senderRole: ChatMemberRole;
   text: string;
   createdAt: string; // ISO datetime
   replyToId?: string | undefined;
   sharedFeedbackId?: string | undefined;
+}
+
+/** One person's reaction to one message. Reacting again with the same emoji removes it (toggle). */
+export interface ChatReaction {
+  id: string;
+  messageId: string;
+  memberId: string;
+  memberRole: ChatMemberRole;
+  emoji: string;
 }
 
 export interface Database {
@@ -262,11 +287,12 @@ export interface Database {
   feedback: Feedback[];
   chatRooms: ChatRoom[];
   chatMessages: ChatMessage[];
+  chatReactions: ChatReaction[];
   waitingLists: WaitingList[];
   quotes: Quote[];
 }
 
-const KEY = "tesms.db.v6";
+const KEY = "tesms.db.v7";
 
 /** Every top-level collection the current schema expects - used to detect stale/partial data. */
 const REQUIRED_COLLECTIONS: Array<keyof Database> = [
@@ -289,6 +315,7 @@ const REQUIRED_COLLECTIONS: Array<keyof Database> = [
   "feedback",
   "chatRooms",
   "chatMessages",
+  "chatReactions",
   "waitingLists",
   "quotes",
 ];

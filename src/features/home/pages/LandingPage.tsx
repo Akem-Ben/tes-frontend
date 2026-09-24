@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Hero } from "../components/Hero";
 import { QuoteCarousel } from "../components/QuoteCarousel";
 import { AboutSection } from "../components/AboutSection";
+import { Footer } from "../components/Footer";
 import { StickyRoleButtons } from "../components/StickyRoleButtons";
 import { ThemeToggle } from "@/shared/components";
 import { media } from "@/theme";
@@ -46,15 +47,6 @@ const BrandLogo = styled.img`
   object-fit: cover;
 `;
 
-const Footer = styled.footer`
-  border-top: 1px solid ${({ theme }) => theme.color.border};
-  background-color: ${({ theme }) => (theme.name === "dark" ? theme.color.bg : "#ffffff")};
-  padding: 2rem 1rem;
-  text-align: center;
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.color.textMuted};
-`;
-
 export function LandingPage() {
   return (
     <Page>
@@ -69,11 +61,7 @@ export function LandingPage() {
       <Hero />
       <QuoteCarousel />
       <AboutSection />
-
-      <Footer>
-        © {new Date().getFullYear()} Transforming Experience School. Accounts
-        are issued by the school office.
-      </Footer>
+      <Footer />
 
       <StickyRoleButtons />
     </Page>

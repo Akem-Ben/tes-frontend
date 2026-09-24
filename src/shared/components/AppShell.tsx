@@ -47,6 +47,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
       icon: "📇",
       mobileHidden: true,
     },
+    { to: "/payments", label: "Payments", icon: "💳" },
     { to: "/feedback", label: "Feedback", icon: "💬" },
     { to: "/analytics", label: "Analytics", icon: "📊" },
   ],
@@ -66,6 +67,26 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { to: "/payments", label: "Payments", icon: "💳" },
     { to: "/feedback", label: "Feedback", icon: "💬" },
     { to: "/analytics", label: "Analytics", icon: "📊" },
+  ],
+  // Sees everything: every president screen, every admin screen, and every facilitator's own
+  // groups/cohorts - same nav as admin, plus Chat (facilitators can add admins to rooms now).
+  superadmin: [
+    { to: "/dashboard", label: "Dashboard", icon: "🏠" },
+    { to: "/facilitators", label: "Facilitators", icon: "🧑‍🏫" },
+    { to: "/cohorts", label: "Cohorts", icon: "📅" },
+    { to: "/groups", label: "Groups", icon: "👥" },
+    { to: "/reports", label: "Reports", icon: "📤" },
+    { to: "/waiting-list", label: "Waiting List", icon: "🕒" },
+    {
+      to: "/redundant-students",
+      label: "Redundant Students",
+      icon: "📇",
+      mobileHidden: true,
+    },
+    { to: "/payments", label: "Payments", icon: "💳" },
+    { to: "/feedback", label: "Feedback", icon: "💬" },
+    { to: "/analytics", label: "Analytics", icon: "📊" },
+    { to: "/chat", label: "Chat", icon: "💭", mobileHidden: true },
   ],
 };
 

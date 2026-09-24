@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import styled from "styled-components";
 import type { ChatMessage } from "@/shared/lib/mockStore";
 import { Button, Input } from "@/shared/ui";
+import { EmojiPicker } from "@/shared/components";
 
 interface ChatComposerProps {
   replyTo?: { message: ChatMessage; senderName: string } | undefined;
@@ -61,6 +62,16 @@ const InputWrap = styled.div`
   flex: 1;
 `;
 
+const EmojiButtonWrap = styled.div`
+  position: relative;
+`;
+
+const EmojiPopoverAnchor = styled.div`
+  position: absolute;
+  bottom: 2.75rem;
+  left: 0;
+`;
+
 export function ChatComposer({
   replyTo,
   onCancelReply,
@@ -68,6 +79,7 @@ export function ChatComposer({
   onShareFeedback,
 }: ChatComposerProps) {
   const [text, setText] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -102,6 +114,28 @@ export function ChatComposer({
         >
           💬 Share feedback
         </Button>
+        <EmojiButtonWrap>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => setPickerOpen((o) => !o)}
+            aria-label="Add an emoji"
+          >
+            😀
+          </Button>
+          {pickerOpen && (
+            <EmojiPopoverAnchor>
+              <EmojiPicker
+                onSelect={(emoji) => {
+                  setText((t) => t + emoji);
+                  setPickerOpen(false);
+                }}
+                onClose={() => setPickerOpen(false)}
+              />
+            </EmojiPopoverAnchor>
+          )}
+        </EmojiButtonWrap>
         <InputWrap>
           <Input
             placeholder="Type a message..."

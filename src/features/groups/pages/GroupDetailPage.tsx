@@ -185,6 +185,7 @@ const groupTools = (groupId: string) => [
   { to: `/groups/${groupId}/retreats`, label: "Retreats", icon: "⛺" },
   { to: `/groups/${groupId}/feedback`, label: "Feedback", icon: "💬" },
   { to: `/groups/${groupId}/analytics`, label: "Analytics", icon: "📊" },
+  { to: `/groups/${groupId}/payments`, label: "Payments", icon: "💳" },
 ];
 
 const poolTabs = [

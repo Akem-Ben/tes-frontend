@@ -120,7 +120,8 @@ export function AnalyticsPage() {
   const [facilitatorId, setFacilitatorId] = useState("all");
   const isGroupScoped = Boolean(paramGroup);
   const isOrgWide =
-    !isGroupScoped && (role === "president" || role === "admin");
+    !isGroupScoped &&
+    (role === "president" || role === "admin" || role === "superadmin");
   const group = paramGroup ?? ownGroup;
 
   if (!isOrgWide && !group) {

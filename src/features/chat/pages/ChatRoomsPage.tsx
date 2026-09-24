@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { Card, Button, Modal, Input } from "@/shared/ui";
+import { Card, Button, Modal, Input, Badge } from "@/shared/ui";
 import { PageHeader, EmptyState } from "@/shared/components";
-import { useDb } from "@/shared/lib";
-import { useFacilitatorId } from "@/features/auth";
-import { createRoom, listRoomsForFacilitator } from "../api";
+import { useAuth } from "@/features/auth";
+import type { ChatMemberRole } from "@/shared/lib/mockStore";
+import { createRoom, listAllRooms, listRoomsForMember } from "../api";
+import { MemberSearchModal } from "../components/MemberSearchModal";
+import type { ChatSearchResult } from "../api/types";
 
 const RoomList = styled.ul`
   > * + * {
@@ -43,57 +45,80 @@ const Form = styled.form`
   }
 `;
 
-const FacilitatorList = styled.div`
-  > * + * {
-    margin-top: 0.375rem;
-  }
-`;
-
-const FacilitatorRow = styled.label`
+const MemberChips = styled.div`
+  margin-top: 0.5rem;
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.color.textBody};
+  flex-wrap: wrap;
+  gap: 0.375rem;
 `;
 
-const Checkbox = styled.input`
-  height: 1rem;
-  width: 1rem;
-  accent-color: ${({ theme }) => theme.color.brand};
+const RemoveChip = styled.button`
+  margin-left: 0.25rem;
 `;
 
 export function ChatRoomsPage() {
-  const db = useDb();
-  const facilitatorId = useFacilitatorId();
+  const { user, role } = useAuth();
+  const memberId = user?.id ?? "";
+  const memberRole: ChatMemberRole =
+    role === "facilitator" ? "facilitator" : "admin";
+  const isOversight = role === "superadmin";
   const [open, setOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [name, setName] = useState("");
-  const [selected, setSelected] = useState<string[]>([]);
+  const [facilitators, setFacilitators] = useState<ChatSearchResult[]>([]);
+  const [admins, setAdmins] = useState<ChatSearchResult[]>([]);
+  const [students, setStudents] = useState<ChatSearchResult[]>([]);
 
-  const rooms = listRoomsForFacilitator(facilitatorId);
-  const otherFacilitators = db.facilitators.filter(
-    (f) => f.id !== facilitatorId,
-  );
+  const rooms = isOversight
+    ? listAllRooms()
+    : listRoomsForMember(memberId, memberRole);
 
-  const toggle = (id: string) =>
-    setSelected((current) =>
-      current.includes(id) ? current.filter((f) => f !== id) : [...current, id],
-    );
+  const addMember = (result: ChatSearchResult) => {
+    if (result.type === "facilitator") setFacilitators((c) => [...c, result]);
+    else if (result.type === "admin") setAdmins((c) => [...c, result]);
+    else setStudents((c) => [...c, result]);
+  };
+
+  const removeMember = (result: ChatSearchResult) => {
+    if (result.type === "facilitator")
+      setFacilitators((c) => c.filter((r) => r.id !== result.id));
+    else if (result.type === "admin")
+      setAdmins((c) => c.filter((r) => r.id !== result.id));
+    else setStudents((c) => c.filter((r) => r.id !== result.id));
+  };
+
+  const picked = [...facilitators, ...admins, ...students];
+
+  const resetForm = () => {
+    setName("");
+    setFacilitators([]);
+    setAdmins([]);
+    setStudents([]);
+  };
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    createRoom(name.trim(), selected, facilitatorId);
-    setName("");
-    setSelected([]);
+    createRoom({
+      name: name.trim(),
+      facilitatorIds: facilitators.map((f) => f.id),
+      adminIds: admins.map((a) => a.id),
+      studentIds: students.map((s) => s.id),
+      createdBy: memberId,
+      createdByRole: memberRole,
+    });
+    resetForm();
     setOpen(false);
   };
+
+  const totalMembers = (r: (typeof rooms)[number]) =>
+    r.facilitatorIds.length + r.adminIds.length;
 
   return (
     <>
       <PageHeader
         title="Chat"
-        subtitle="Discuss with other facilitators"
+        subtitle="Discuss with facilitators and admins - add students to tag a conversation"
         action={<Button onClick={() => setOpen(true)}>+ New room</Button>}
       />
 
@@ -102,7 +127,7 @@ export function ChatRoomsPage() {
           <EmptyState
             icon="💬"
             title="No chat rooms yet"
-            message="Create a room and add other facilitators to start discussing."
+            message="Create a room and search for who to add - facilitators, admins or students."
             action={<Button onClick={() => setOpen(true)}>Create room</Button>}
           />
         ) : (
@@ -112,7 +137,12 @@ export function ChatRoomsPage() {
                 <RoomLink to={`/chat/${r.id}`}>
                   <div>
                     <RoomName>{r.name}</RoomName>
-                    <RoomMeta>{r.facilitatorIds.length} facilitators</RoomMeta>
+                    <RoomMeta>
+                      {totalMembers(r)} member{totalMembers(r) === 1 ? "" : "s"}
+                      {r.studentIds.length > 0
+                        ? ` · ${r.studentIds.length} student${r.studentIds.length === 1 ? "" : "s"} tagged`
+                        : ""}
+                    </RoomMeta>
                   </div>
                   <span aria-hidden>→</span>
                 </RoomLink>
@@ -125,10 +155,19 @@ export function ChatRoomsPage() {
       <Modal
         open={open}
         title="New chat room"
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          resetForm();
+          setOpen(false);
+        }}
         footer={
           <>
-            <Button variant="secondary" onClick={() => setOpen(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                resetForm();
+                setOpen(false);
+              }}
+            >
               Cancel
             </Button>
             <Button type="submit" form="room-form">
@@ -146,21 +185,41 @@ export function ChatRoomsPage() {
             required
           />
           <div>
-            <FacilitatorList>
-              {otherFacilitators.map((f) => (
-                <FacilitatorRow key={f.id}>
-                  <Checkbox
-                    type="checkbox"
-                    checked={selected.includes(f.id)}
-                    onChange={() => toggle(f.id)}
-                  />
-                  {f.name}
-                </FacilitatorRow>
-              ))}
-            </FacilitatorList>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setAddOpen(true)}
+            >
+              + Add members
+            </Button>
+            {picked.length > 0 && (
+              <MemberChips>
+                {picked.map((m) => (
+                  <Badge key={`${m.type}-${m.id}`} tone="brand">
+                    {m.name}
+                    <RemoveChip
+                      type="button"
+                      onClick={() => removeMember(m)}
+                      aria-label={`Remove ${m.name}`}
+                    >
+                      ✕
+                    </RemoveChip>
+                  </Badge>
+                ))}
+              </MemberChips>
+            )}
           </div>
         </Form>
       </Modal>
+
+      <MemberSearchModal
+        open={addOpen}
+        title="Add members"
+        excludeIds={picked.map((m) => m.id)}
+        onClose={() => setAddOpen(false)}
+        onAdd={addMember}
+      />
     </>
   );
 }

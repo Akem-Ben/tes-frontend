@@ -18,7 +18,8 @@ export function ReportsPage() {
   const db = useDb();
   const { role } = useAuth();
   const ownFacilitatorId = useFacilitatorId();
-  const isOrgWide = role === "president" || role === "admin";
+  const isOrgWide =
+    role === "president" || role === "admin" || role === "superadmin";
   const [facilitatorId, setFacilitatorId] = useState("all");
   const [cohortId, setCohortId] = useState("all");
   const [groupId, setGroupId] = useState("all");

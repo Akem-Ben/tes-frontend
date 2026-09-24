@@ -52,7 +52,8 @@ export function GroupsPage() {
   const db = useDb();
   const { role } = useAuth();
   const facilitatorId = useFacilitatorId();
-  const isOrgWide = role === "president" || role === "admin";
+  const isOrgWide =
+    role === "president" || role === "admin" || role === "superadmin";
   const ownGroups = db.groups.filter((g) =>
     g.facilitatorIds.includes(facilitatorId),
   );

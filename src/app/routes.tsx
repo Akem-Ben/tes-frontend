@@ -171,6 +171,14 @@ export function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/groups/:groupId/payments"
+        element={
+          <ProtectedRoute>
+            <PaymentsPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* A student's profile isn't tied to one group - they can be in several. */}
       <Route
@@ -182,11 +190,12 @@ export function AppRoutes() {
         }
       />
 
-      {/* Facilitator-only: chat isn't tied to groups. */}
+      {/* Facilitator + admin: chat isn't tied to groups. A facilitator can add an admin (or a
+          student, tagged only) to a room - see the chat feature's member search. */}
       <Route
         path="/chat"
         element={
-          <ProtectedRoute roles={["facilitator"]}>
+          <ProtectedRoute roles={["facilitator", "admin"]}>
             <ChatRoomsPage />
           </ProtectedRoute>
         }
@@ -194,7 +203,7 @@ export function AppRoutes() {
       <Route
         path="/chat/:roomId"
         element={
-          <ProtectedRoute roles={["facilitator"]}>
+          <ProtectedRoute roles={["facilitator", "admin"]}>
             <ChatRoomPage />
           </ProtectedRoute>
         }
@@ -262,7 +271,7 @@ export function AppRoutes() {
       <Route
         path="/payments"
         element={
-          <ProtectedRoute roles={["admin"]}>
+          <ProtectedRoute roles={["admin", "president"]}>
             <PaymentsPage />
           </ProtectedRoute>
         }

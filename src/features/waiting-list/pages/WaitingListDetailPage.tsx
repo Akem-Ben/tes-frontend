@@ -114,9 +114,11 @@ export function WaitingListDetailPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [moveCohortId, setMoveCohortId] = useState("");
 
-  const canManage = role === "facilitator" || role === "admin";
-  const canAssignFacilitator = role === "admin";
-  const canMoveToCohort = role === "admin" || role === "president";
+  const canManage =
+    role === "facilitator" || role === "admin" || role === "superadmin";
+  const canAssignFacilitator = role === "admin" || role === "superadmin";
+  const canMoveToCohort =
+    role === "admin" || role === "president" || role === "superadmin";
 
   if (!waitingList) {
     return (

@@ -7,13 +7,16 @@ import { Button, Input } from "@/shared/ui";
 import { ThemeToggle } from "@/shared/components";
 import { media } from "@/theme";
 
-const labels: Record<Role, string> = {
+/** No separate login route for superadmin - a super admin signs in as "admin" (see auth/api/login). */
+type LoginRole = Exclude<Role, "superadmin">;
+
+const labels: Record<LoginRole, string> = {
   admin: "Admin",
   president: "President",
   facilitator: "Facilitator",
 };
 
-const demoEmail: Record<Role, string> = {
+const demoEmail: Record<LoginRole, string> = {
   admin: "admin@tes.edu",
   president: "president@tes.edu",
   facilitator: "facilitator@tes.edu",
@@ -99,7 +102,7 @@ const Note = styled.p`
 `;
 
 /** One typed form shared by all three login routes. */
-export function LoginForm({ role }: { role: Role }) {
+export function LoginForm({ role }: { role: LoginRole }) {
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState(demoEmail[role]);

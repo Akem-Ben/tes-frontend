@@ -112,7 +112,8 @@ export function CohortDetailPage() {
   const [moveOpen, setMoveOpen] = useState(false);
   const [moveSelected, setMoveSelected] = useState<Set<string>>(new Set());
   const [poolSelected, setPoolSelected] = useState<Set<string>>(new Set());
-  const canManagePool = role === "admin" || role === "president";
+  const canManagePool =
+    role === "admin" || role === "president" || role === "superadmin";
 
   if (!cohort) {
     return (

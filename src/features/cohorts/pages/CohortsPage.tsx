@@ -53,8 +53,10 @@ export function CohortsPage() {
   const db = useDb();
   const { role } = useAuth();
   const facilitatorId = useFacilitatorId();
-  const isOrgWide = role === "president" || role === "admin";
-  const canCreate = role === "facilitator" || role === "admin";
+  const isOrgWide =
+    role === "president" || role === "admin" || role === "superadmin";
+  const canCreate =
+    role === "facilitator" || role === "admin" || role === "superadmin";
   const cohorts = isOrgWide
     ? db.cohorts
     : db.cohorts.filter((s) => s.facilitatorId === facilitatorId);
@@ -86,10 +88,9 @@ export function CohortsPage() {
     ...(isOrgWide
       ? [
           {
-            header: "Facilitator",
+            header: "Groups",
             cell: (s: Cohort) =>
-              db.facilitators.find((f) => f.id === s.facilitatorId)?.name ??
-              "Admin (org-wide)",
+              db.groups.filter((g) => g.cohortId === s.id).length,
           },
         ]
       : []),

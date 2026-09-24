@@ -19,7 +19,7 @@ export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
     return (
       <Navigate to="/login/facilitator" state={{ from: location }} replace />
     );
-  if (roles && !roles.includes(role))
+  if (roles && role !== "superadmin" && !roles.includes(role))
     return <Navigate to="/dashboard" replace />;
 
   return <AppShell>{children}</AppShell>;

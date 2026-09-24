@@ -49,7 +49,7 @@ export function WaitingListsPage() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const lists = listWaitingLists();
-  const canCreate = role === "admin";
+  const canCreate = role === "admin" || role === "superadmin";
 
   const submit = (e: FormEvent) => {
     e.preventDefault();

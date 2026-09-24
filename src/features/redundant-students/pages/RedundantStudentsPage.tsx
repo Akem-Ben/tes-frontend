@@ -34,7 +34,8 @@ export function RedundantStudentsPage() {
   const { role } = useAuth();
   const [targeting, setTargeting] = useState<Student | null>(null);
   const [waitingListId, setWaitingListId] = useState("");
-  const canManage = role === "facilitator" || role === "admin";
+  const canManage =
+    role === "facilitator" || role === "admin" || role === "superadmin";
 
   const students = listRedundantStudents();
 

@@ -58,7 +58,8 @@ export function FeedbackPage() {
   const { group: paramGroup } = useGroupParam();
   const isGroupScoped = Boolean(paramGroup);
   const isOrgWide =
-    !isGroupScoped && (role === "president" || role === "admin");
+    !isGroupScoped &&
+    (role === "president" || role === "admin" || role === "superadmin");
   const canAdd = role === "facilitator";
   const [studentFilter, setStudentFilter] = useState("all");
   const [facilitatorFilter, setFacilitatorFilter] = useState("all");
