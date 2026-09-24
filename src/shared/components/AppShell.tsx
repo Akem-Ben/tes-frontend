@@ -6,6 +6,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { initials } from "@/shared/lib/format";
 import { media } from "@/theme";
 import type { Role } from "@/features/auth/api/types";
+import logo from "@/assets/pistis-logo.jpg";
 
 interface NavItem {
   to: string;
@@ -94,7 +95,17 @@ const Sidebar = styled.aside`
 
 const BrandLink = styled(Link)`
   margin-bottom: 1.5rem;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+`;
+
+const BrandLogo = styled.img`
+  height: 2.5rem;
+  width: 2.5rem;
+  flex-shrink: 0;
+  border-radius: ${({ theme }) => theme.radius.full};
+  object-fit: cover;
 `;
 
 const BrandName = styled.p`
@@ -180,6 +191,23 @@ const MenuButton = styled.button`
   padding: 0.25rem 0.5rem;
   font-size: 1.25rem;
   color: ${({ theme }) => theme.color.textMuted};
+
+  ${media.lg} {
+    display: none;
+  }
+`;
+
+const TopbarLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const MobileLogo = styled.img`
+  height: 1.75rem;
+  width: 1.75rem;
+  border-radius: ${({ theme }) => theme.radius.full};
+  object-fit: cover;
 
   ${media.lg} {
     display: none;
@@ -353,8 +381,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     <Root>
       <Sidebar>
         <BrandLink to="/">
-          <BrandName>Transforming Experience</BrandName>
-          <BrandSub>School Management</BrandSub>
+          <BrandLogo src={logo} alt="" />
+          <div>
+            <BrandName>Transforming Experience</BrandName>
+            <BrandSub>School Management</BrandSub>
+          </div>
         </BrandLink>
         <SideNav>{navLinks()}</SideNav>
         <SignOutButton onClick={handleSignOut}>↩︎ Sign out</SignOutButton>
@@ -362,12 +393,15 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <Content>
         <Topbar>
-          <MenuButton
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-label="Toggle menu"
-          >
-            ☰
-          </MenuButton>
+          <TopbarLeft>
+            <MenuButton
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label="Toggle menu"
+            >
+              ☰
+            </MenuButton>
+            <MobileLogo src={logo} alt="" />
+          </TopbarLeft>
           <Welcome>Welcome back, {user?.name ?? "there"}</Welcome>
           <TopRight>
             <ThemeToggle />

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import hero1 from "@/assets/hero-1.jpg";
-import hero2 from "@/assets/hero-2.jpg";
-import hero3 from "@/assets/hero-3.jpg";
+import hero1 from "@/assets/her1.jpeg";
+import hero3 from "@/assets/her3.jpeg";
+import hero4 from "@/assets/her4.jpeg";
 import { media } from "@/theme";
 
-const photos = [hero1, hero2, hero3];
+const photos = [hero1, hero3, hero4];
 
 const Section = styled.section`
   position: relative;
